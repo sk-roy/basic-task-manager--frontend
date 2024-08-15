@@ -31,6 +31,23 @@ import { RouterLink, RouterView } from "vue-router";
                   >New Task</RouterLink
                 >
               </li>
+              <li class="nav-item">
+                <RouterLink
+                  class="nav-link active"
+                  aria-current="page"
+                  to="/login"
+                  >Log In</RouterLink
+                >
+              </li>
+              <li class="nav-item">
+                <RouterLink
+                  class="nav-link active"
+                  aria-current="page"
+                  to="/login"
+                  @click="logout"
+                  >Log Out</RouterLink
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -40,3 +57,37 @@ import { RouterLink, RouterView } from "vue-router";
 
   <RouterView />
 </template>
+
+<script>
+export default {
+  methods: {
+    logout() {
+      token = getTokenFromCookie();
+      axios
+        .post("http://127.0.0.1:8000/api/logout", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          this.$router.push("/login");
+          document.cookie = "auth_token=; path=/; max-age=0";
+          console.log(res.data.status);
+        });
+    },
+
+    getTokenFromCookie() {
+      const name = "auth_token=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const cookieArray = decodedCookie.split(";");
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i].trim();
+        if (cookie.indexOf(name) === 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return null;
+    },
+  },
+};
+</script>

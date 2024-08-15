@@ -57,10 +57,29 @@ export default {
   },
   methods: {
     getTasks() {
-      axios.get("http://127.0.0.1:8000/api/tasks").then((res) => {
-        this.tasks = res.data.tasks;
-        console.log(this.tasks);
-      });
+      const token = this.getTokenFromCookie();
+      axios
+        .get("http://127.0.0.1:8000/api/tasks", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          this.tasks = res.data.tasks;
+          console.log(this.tasks);
+        });
+    },
+    getTokenFromCookie() {
+      const name = "auth_token=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const cookieArray = decodedCookie.split(";");
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i].trim();
+        if (cookie.indexOf(name) === 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return null;
     },
   },
 };
