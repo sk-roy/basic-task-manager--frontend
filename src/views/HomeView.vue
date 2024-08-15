@@ -1,9 +1,67 @@
-<script setup>
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
-
 <template>
   <main>
-    <TheWelcome />
+    <div class="container">
+      <div class="card">
+        <div class="card-header">
+          <h4>Tasks</h4>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td>Title</td>
+                <td>Description</td>
+                <td>Due Date</td>
+                <td>Status</td>
+                <td>Action</td>
+              </tr>
+            </thead>
+            <tbody v-if="this.tasks.length > 0">
+              <tr v-for="(task, index) in this.tasks" :key="index">
+                <td>{{ task.title }}</td>
+                <td>{{ task.description }}</td>
+                <td>{{ task.due_date }}</td>
+                <td>{{ task.status ? "Completed" : "Incompleted" }}</td>
+                <td>
+                  <RouterLink to="/" class="btn btn-success"> Edit </RouterLink>
+                  <button type="button" class="btn btn-danger">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr>
+                <td colspan="4">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
+
+<script>
+import axios from "axios";
+
+export default {
+  name: "tasks",
+  data() {
+    return {
+      tasks: [],
+    };
+  },
+
+  mounted() {
+    // console.log("I am here");
+    this.getTasks();
+  },
+  methods: {
+    getTasks() {
+      axios.get("http://127.0.0.1:8000/api/tasks").then((res) => {
+        this.tasks = res.data.tasks;
+        console.log(this.tasks);
+      });
+    },
+  },
+};
+</script>
