@@ -40,6 +40,7 @@ import { RouterLink, RouterView } from "vue-router";
                 >
               </li>
               <li class="nav-item">
+                <!-- <button onclick="logout()">LogOut</button> -->
                 <RouterLink
                   class="nav-link active"
                   aria-current="page"
@@ -59,21 +60,27 @@ import { RouterLink, RouterView } from "vue-router";
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   methods: {
-    logout() {
-      token = getTokenFromCookie();
-      axios
-        .post("http://127.0.0.1:8000/api/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          this.$router.push("/login");
-          document.cookie = "auth_token=; path=/; max-age=0";
-          console.log(res.data.status);
-        });
+    async logout() {
+      try {
+        const token = this.getTokenFromCookie();
+        document.cookie = "auth_token=; path=/; max-age=0";
+        await axios.post("http://127.0.0.1:8000/api/logout", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            // this.$router.push("/login");
+            console.log(res.data.status);
+          });
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
+      this.$router.push("/login");
     },
 
     getTokenFromCookie() {

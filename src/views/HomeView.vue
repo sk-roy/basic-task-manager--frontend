@@ -23,7 +23,7 @@
                 <td>{{ task.due_date }}</td>
                 <td>{{ task.status ? "Completed" : "Incompleted" }}</td>
                 <td>
-                  <RouterLink to="/" class="btn btn-success"> Edit </RouterLink>
+                  <RouterLink :to="{path: '/tasks/' + task.id + '/update'}" class="btn btn-success"> Update </RouterLink>
                   <button type="button" class="btn btn-danger">Delete</button>
                 </td>
               </tr>

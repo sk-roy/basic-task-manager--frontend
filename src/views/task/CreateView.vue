@@ -59,19 +59,25 @@ export default {
 
   methods: {
     saveTask() {
-      var token = getTokenFromCookie();
+      var token = this.getTokenFromCookie();
       console.log(token);
       console.log(this.model.task.title);
-      // axios
-      //   .post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //   })
-      //   .then((res) => {
-      //     console.log(res);
-      //     alert(res.data.message);
-      //   });
+      axios
+        .post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          alert(res.data.message);
+          this.model.task = {
+            title: '',
+            description: '',
+            due_date: '',
+            status: '',
+          }
+        });
     },
 
     getTokenFromCookie() {
