@@ -69,7 +69,7 @@ import axios from 'axios';
           },
         })
         .then(res => {
-          this.model.task = res.data.task;
+          this.model.task = res.data;
         })
 
       },
