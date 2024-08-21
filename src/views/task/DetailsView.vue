@@ -1,6 +1,4 @@
-<template>
-
-  
+<template>  
 <div class="container">
       <div class="card">
         <div class="card-header">
@@ -51,7 +49,7 @@
         </li>
       </ul>
     </div>
-  </div>
+</div>
 </template>
 
 

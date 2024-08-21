@@ -1,45 +1,67 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-      <h2 class="text-2xl font-semibold text-center mb-6">Your Profile</h2>
-      <div v-if="user" class="space-y-4">
-        <div>
-          <span class="font-semibold">Name:</span>
-          <span>{{ user.name }}</span>
+
+
+<div class="container">
+      <div class="card">
+        <div class="card-header">
+          <h4>{{ user.name }}</h4>
         </div>
-        <div>
-          <span class="font-semibold">Email:</span>
-          <span>{{ user.email }}</span>
+        <div class="card-body">
+
+          <div class="mb-6">
+            <h5 class="text-lg font-semibold mb-2">{{ user.email }}</h5>
+          </div>
+
+          <div class="mb-6">
+            <h5 class="text-lg font-semibold mb-2">{{ user.admin == 1 ? 'Admin' : 'Not Admin' }}</h5>
+          </div>
         </div>
       </div>
-      <div v-else class="text-center text-gray-500">
-        Loading profile...
-      </div>
-    </div>
-  </div>
+</div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+<script>
+import axios from "axios";
 
-const user = ref(null);
-const errorMessage = ref('');
+export default {
+  name: "tasks",
+  data() {
+    return {
+      user: [],
+    };
+  },
 
-// Set up Axios to use credentials
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000'; // Your Laravel API URL
+  mounted() {
+    this.getUser();
+  },
 
-// Fetch user profile on page load
-const fetchUserProfile = async () => {
-  try {
-    const response = await axios.get('/api/user');
-    user.value = response.data;
-  } catch (error) {
-    errorMessage.value = 'Failed to load profile. Please try again.';
-  }
+  methods: {
+    getUser() {
+      const token = this.getTokenFromCookie();
+      axios
+        .get("http://127.0.0.1:8000/api/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          this.user = res.data;
+        });
+    },
+
+    getTokenFromCookie() {
+      const name = "auth_token=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const cookieArray = decodedCookie.split(";");
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i].trim();
+        if (cookie.indexOf(name) === 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return null;
+    },
+  },
 };
-
-// Fetch profile data when component is mounted
-onMounted(fetchUserProfile);
 </script>

@@ -102,6 +102,7 @@ import axios from 'axios';
             due_date: '',
             status: '',
           }
+          this.$router.push("/");
         })
         .catch(function (error) {
           if (error.response) {

@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -50,26 +51,22 @@ export default {
         task: {
           title: "",
           description: "",
-          due_date: "",
-          status: "",
+          due_date: new Date().toISOString().split("T")[0],
+          status: "0",
         },
       },
     };
   },
 
   methods: {
-    saveTask() {
+    async saveTask() {
       var token = this.getTokenFromCookie();
-      console.log(token);
-      console.log(this.model.task.title);
-      axios
-        .post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
+      await axios.post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
         .then((res) => {
-          console.log(res);
           alert(res.data.message);
           this.model.task = {
             title: '',

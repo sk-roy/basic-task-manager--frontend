@@ -2,10 +2,21 @@
   <main>
     <div class="container">
       <div class="card">
-        <div class="card-header flex space-between">
-          <div><h4>Tasks</h4></div>
-          <button type="button" class="btn btn-primary" @click="shareTasks()" >Share</button>
+
+        <div class="card-header row-container flex justify-between items-center p-4 bg-gray-100 rounded-lg">
+          <div>
+            <h4 class="text-lg font-semibold">Tasks</h4>
+          </div>
+          <button type="button" class="btn btn-primary" v-if="shareButtonVisible" @click="toggleShareButton"> Share </button>
+          <form v-if="!shareButtonVisible">
+            <div class="mb-3 mw-100">
+              <label for="">Email</label>
+              <input type="text" v-model="share.email" class="form-control" required/>
+            </div>
+            <button type="button" class="btn btn-primary" @click="shareTasks"> Done </button>
+          </form>
         </div>
+
         <div class="card-body">
           <table class="table table-bordered">
             <thead>
@@ -25,7 +36,7 @@
                 <td class="px-4 py-2">
                   <input
                     type="checkbox"
-                    v-model="selectedTasks"
+                    v-model="share.selectedTasks"
                     :value="task.id"
                   />
                 </td>
@@ -60,8 +71,12 @@ export default {
   data() {
     return {
       tasks: [],
-      selectedTasks: [],
+      share: {
+        selectedTasks: [],
+        email: '',
+      },
       selectAll: false,
+      shareButtonVisible: true,
     };
   },
 
@@ -111,18 +126,40 @@ export default {
 
     toggleSelectAll() {
       if (this.selectAll) {
-        this.selectedTasks = this.tasks.map(task => task.id);
+        this.share.selectedTasks = this.tasks.map(task => task.id);
       } else {
-        this.selectedTasks = [];
+        this.share.selectedTasks = [];
       }
-    },
-    
+    },    
 
     formatDate(value) {
       if (value) {
         return new Date(value).toISOString().slice(0, 10);
       }
     },
+
+    async shareTasks() {
+      if (!this.share.email) {
+        alert('Please enter registered email');
+      } else {
+        var token = this.getTokenFromCookie();
+        await axios.post("http://127.0.0.1:8000/api/tasks/share", this.share, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            alert(res.data.message);
+            this.toggleShareButton();
+          });
+        }
+    },
+
+    toggleShareButton() {
+      this.shareButtonVisible = !this.shareButtonVisible;
+    }
+
+
   },
 };
 </script>
