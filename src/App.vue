@@ -6,21 +6,27 @@ import { RouterLink, RouterView } from "vue-router";
   <header>
     <div class="wrapper">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <RouterLink class="navbar-brand" to="/">Task Manager</RouterLink>
+        <div class="container-fluid" v-if="!loggedIn">
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <RouterLink class="nav-link active" aria-current="page" to="/"
-                  >Home</RouterLink
-                >
-              </li>
               <li class="nav-item">
                 <RouterLink
                   class="nav-link active"
                   aria-current="page"
-                  to="/about"
-                  >About</RouterLink
+                  to="/login"
+                  >Log In</RouterLink
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="container-fluid" v-if="loggedIn">
+          <RouterLink class="navbar-brand" to="/">Task Manager</RouterLink>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item" >
+                <RouterLink class="nav-link active" aria-current="page" to="/"
+                  >Home</RouterLink
                 >
               </li>
               <li class="nav-item">
@@ -35,12 +41,11 @@ import { RouterLink, RouterView } from "vue-router";
                 <RouterLink
                   class="nav-link active"
                   aria-current="page"
-                  to="/login"
-                  >Log In</RouterLink
+                  to="/profile"
+                  >{{ user.name }}</RouterLink
                 >
               </li>
               <li class="nav-item">
-                <!-- <button onclick="logout()">LogOut</button> -->
                 <RouterLink
                   class="nav-link active"
                   aria-current="page"
@@ -63,6 +68,18 @@ import { RouterLink, RouterView } from "vue-router";
 import axios from "axios";
 
 export default {
+  name: "app",
+  data() {
+    return {
+      user: [],
+      loggedIn: false,
+    };
+  },
+
+  mounted() {
+    this.getUser();
+  },
+
   methods: {
     async logout() {
       try {
@@ -81,6 +98,20 @@ export default {
         console.error('Error during logout:', error);
       }
       this.$router.push("/login");
+    },
+    
+    async getUser() {
+      const token = this.getTokenFromCookie();
+      await axios.get("http://127.0.0.1:8000/api/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        console.log(res);
+        this.loggedIn = true;
+        this.user = res.data;
+      });
     },
 
     getTokenFromCookie() {

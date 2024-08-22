@@ -1,14 +1,13 @@
 <template>
   <main>
-    <div class="container">
+    <div class="container mt-5">
       <div class="card">
 
         <div class="card-header row-container flex justify-between items-center p-4 bg-gray-100 rounded-lg">
           <div>
             <h4 class="text-lg font-semibold">Tasks</h4>
           </div>
-          <button type="button" class="btn btn-primary" v-if="shareButtonVisible" @click="toggleShareButton"> Share </button>
-          <form v-if="!shareButtonVisible">
+          <form v-if="share.selectedTasks.length">
             <div class="mb-3 mw-100">
               <label for="">Email</label>
               <input type="text" v-model="share.email" class="form-control" required/>
@@ -45,9 +44,9 @@
                 <td>{{ this.formatDate(task.due_date) }}</td>
                 <td>{{ task.status ? "Completed" : "Incompleted" }}</td>
                 <td>
-                  <RouterLink :to="{path: '/tasks/' + task.id + '/update'}" class="btn btn-success"> Update </RouterLink>
-                  <button type="button" class="btn btn-danger" @click="deleteTasks(task.id)" >Delete</button>
-                  <RouterLink :to="{path: '/tasks/' + task.id + '/details'}" class="btn btn-success"> Details </RouterLink>
+                  <RouterLink :to="{path: '/tasks/' + task.id + '/update'}" class="btn btn-primary mx-2"> Update </RouterLink>
+                  <RouterLink :to="{path: '/tasks/' + task.id + '/details'}" class="btn btn-success mx-2"> Details </RouterLink>
+                  <button type="button" class="btn btn-danger mx-2" @click="deleteTasks(task.id)" >Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -76,7 +75,6 @@ export default {
         email: '',
       },
       selectAll: false,
-      shareButtonVisible: true,
     };
   },
 
@@ -150,16 +148,10 @@ export default {
           })
           .then((res) => {
             alert(res.data.message);
-            this.toggleShareButton();
+            this.share.selectedTasks = [];
           });
         }
     },
-
-    toggleShareButton() {
-      this.shareButtonVisible = !this.shareButtonVisible;
-    }
-
-
   },
 };
 </script>

@@ -27,7 +27,7 @@
         </select>
         </div>
         <div class="mb-3">
-          <button type="button" @click="saveTask" class="btn btn-primary">Save</button>
+          <button type="button" @click="updateTask" class="btn btn-primary">Save</button>
         </div>
       </div>
     </div>
@@ -69,7 +69,12 @@ import axios from 'axios';
           },
         })
         .then(res => {
-          this.model.task = res.data;
+          this.model.task = {
+            title: res.data.title,
+            description: res.data.description,
+            due_date: new Date(res.data.due_date).toISOString().split("T")[0],
+            status: res.data.status,
+          }
         })
 
       },
@@ -86,28 +91,15 @@ import axios from 'axios';
         return null;
       },
 
-      saveTask(){
+      async updateTask(){
         const token = this.getTokenFromCookie();
-        axios.post(`http://127.0.0.1:8000/api/tasks/${this.$route.params.id}/update`, this.model.task, {
+        await axios.post(`http://127.0.0.1:8000/api/tasks/${this.$route.params.id}/update`, this.model.task, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
         .then(res => {
-          console.log(res);
-          alert(res.data.message)
-          this.model.task = {
-            title: '',
-            description: '',
-            due_date: '',
-            status: '',
-          }
           this.$router.push("/");
-        })
-        .catch(function (error) {
-          if (error.response) {
-            
-          }
         })
       }
     }

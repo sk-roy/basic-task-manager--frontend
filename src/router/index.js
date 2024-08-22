@@ -1,4 +1,4 @@
-import AboutView from '@/views/AboutView.vue'
+import ProfileView from '@/views/auth/ProfileView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
@@ -25,9 +25,9 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/about',
-      name: 'about',
-      component: AboutView
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView
     },
     {
       path: '/newtask',

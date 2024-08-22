@@ -1,33 +1,40 @@
 <template>  
-<div class="container">
+<div class="container mt-5">
       <div class="card">
         <div class="card-header">
           <h4>{{ model.task.title }}</h4>
         </div>
         <div class="card-body">
+          <div class="flex flex-row">
+            <div class="flex">
+              <div class="mb-6">
+                <h5 class="text-lg font-semibold mb-2">Description: {{ model.task.description }}</h5>
+              </div>
 
-          <div class="mb-6">
-            <h5 class="text-lg font-semibold mb-2">Description: {{ model.task.description }}</h5>
-          </div>
+              <div class="mb-6">
+                <h5 class="text-lg font-semibold mb-2">Due Date: {{ this.formatDate(model.task.due_date)}}</h5>
+              </div>
 
-          <div class="mb-6">
-            <h5 class="text-lg font-semibold mb-2">Due Date: {{ this.formatDate(model.task.due_date)}}</h5>
-          </div>
+              <div class="mb-6">
+                <h5 class="text-lg font-semibold mb-2">Status: {{ model.task.status == 1 ? 'Completed' : 'Incompleted' }}</h5>
+              </div>
 
-          <div class="mb-6">
-            <h5 class="text-lg font-semibold mb-2">Status: {{ model.task.status == 1 ? 'Completed' : 'Incompleted' }}</h5>
-          </div>
-
-          <div class="mb-6">
-            <h5 class="text-lg font-semibold mb-2">Labels: </h5>
-            <div class="flex gap-2">
-              <span
-                v-for="label in model.task.labels"
-                :key="label.id"
-                class="bg-blue-200 text-blue-800 py-1 px-3 rounded-full text-sm font-semibold"
-              >
-                {{ label.name }}
-              </span>
+              <div class="mb-6">
+                <h5 class="text-lg font-semibold mb-2">Labels: </h5>
+                <div class="flex gap-2">
+                  <span
+                    v-for="label in model.task.labels"
+                    :key="label.id"
+                    class="bg-blue-200 text-blue-800 py-1 px-3 rounded-full text-sm font-semibold"
+                  >
+                    {{ label.name }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="flex">
+              <input id="fileUpload" type="file">
+              <button @click="chooseFiles()">Upload selected File</button>
             </div>
           </div>
         </div>
