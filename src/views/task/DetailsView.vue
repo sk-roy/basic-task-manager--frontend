@@ -42,7 +42,7 @@
             <div class="mb-6">
               <h5>Files</h5>
               <ul>
-                <div v-for="file in model.files" :key="file.id">
+                <div v-for="file in model.task.files" :key="file.id">
                   <li>{{ file.filename }}</li>
                   <button
                     type="button"
@@ -76,31 +76,53 @@
         <li
           v-for="comment in model.task.comments"
           :key="comment.id"
-          class="mb-4 p-4 border rounded-lg"
+          class="mb-2"
         >
-          <div class="flex justify-between items-center mb-2">
-            <span class="font-semibold">{{ comment.user.name }}</span>
-            <span class="text-gray-500 text-sm">{{
-              comment.created_at | formatDate
-            }}</span>
-          </div>
-          <p>{{ comment.content }}</p>
+          <div class="card">
+            <div class="card-header flex justify-between items-center mb-2">
+              <h5 class="font-semibold">{{ comment.name }}</h5>
+              <span class="text-gray-500 text-sm">{{ formatDateTime(comment.created_at) }}</span>
+            </div>
+            <div class="card-body">
+              <p>{{ comment.message }}</p>
+              <button
+                type="button"
+                class="btn btn-primary mx-2 p-1"
+                @click="editComment(comment)"
+              > Edit </button>
+              <button
+                type="button"
+                class="btn btn-danger mx-2 p-1"
+                @click="deleteComment(comment.id)"
+              > Delete </button>
+            </div>
+        </div>
         </li>
+      </ul>
         <div class="card-body">
           <div class="mb-3">
             <textarea
-              v-model="model.message"
+              v-model="model.newComment.message"
               class="form-control"
               style="width: 400px"
             ></textarea>
           </div>
-          <div class="mb-3">
-            <button type="button" @click="addComment" class="btn btn-primary">
-              Add comment
-            </button>
+          <div>
+            <div class="mb-3" v-if="model.const.update">
+              <button  type="button" @click="updateComment()" class="btn btn-primary mx-2">
+                Update
+              </button>
+              <button type="button" @click="cancelUpdate" class="btn btn-primary">
+                Cancel
+              </button>
+            </div>
+            <div class="mb-3" v-if="!model.const.update">
+              <button type="button" @click="addComment" class="btn btn-primary">
+                Add comment
+              </button>
+            </div>
           </div>
         </div>
-      </ul>
     </div>
   </div>
 </template>
@@ -113,6 +135,11 @@ export default {
   data() {
     return {
       model: {
+        const: {
+          update: false,
+          updateCommentId: "",
+          file: null,
+        },
         task: {
           title: "",
           description: "",
@@ -120,67 +147,91 @@ export default {
           status: "",
           comments: [],
           labels: [],
-          file: null,
+          files: [],
         },
-        files: [],
-        message: "",
+        newComment: {
+          message: "",
+          task_id: "",
+        }
       },
     };
   },
 
   mounted() {
-    this.getTaskData(this.$route.params.id);
-    this.getFileList();
+    this.getTaskData();
+    // this.getFileList();
   },
 
   methods: {
     async addComment() {
       try {
+        this.model.newComment.task_id = this.$route.params.id;
         const res = await apiClient.post(
-          "/comment/create",
-          this.model.message,
-          {
-            params: {
-              task_id: this.$route.params.id,
-            },
-          }
+          "/comments/create",
+          this.model.newComment,
         );
+        await this.getTaskData();
+        this.cancelUpdate();
+      } catch (error) {
+        console.error(`Comment add failed to task ${this.model.newComment.task_id}:`, error);
+        alert("Comment adding failed");
+      }
+    },
+
+    async editComment(comment) {
+      this.model.newComment = {
+        'message': comment.message,
+        'task_id': comment.task_id,
+      }
+      this.model.const.updateCommentId = comment.id;
+      this.model.const.update = true;
+    },
+
+    async updateComment(comment) {
+    try {
+      const res = await apiClient.patch(
+        `/comments/${this.model.const.updateCommentId}/update`,
+        this.model.newComment,
+      );      
+      await this.getTaskData();
+      this.cancelUpdate();
+      } catch (error) {
+        console.error(`Comment updating failed on task ${this.model.newComment.task_id}:`, error);
+        alert("Comment updating failed");
+      }
+    },
+
+    cancelUpdate() {
+      this.model.newComment.message = "";
+      this.model.const.update = false;
+    },
+
+    async deleteComment(commentId) {
+      try {
+        this.model.newComment.task_id = this.$route.params.id;
+        const res = await apiClient.delete(`/comments/${commentId}/delete`);
+        await this.getTaskData();
+      } catch (error) {
+        console.error(`Comment deleting to task ${this.model.newComment.task_id}:`, error);
+        alert("Comment deleting failed");
+      }
+    },
+
+    async getTaskData() {
+      try {
+        const res = await apiClient.get(`/tasks/${this.$route.params.id}`);
         console.log(res);
-        // this.model.task = res.data;
+        this.model.task = res.data.task;
       } catch (error) {
         console.error(`Task ${taskID} loading failed:`, error);
         alert("Task load Failed");
-      }
-    },
-
-    async getTaskData(taskId) {
-      try {
-        const res = await apiClient.get(`/tasks/${taskId}`);
-        this.model.task = res.data;
-      } catch (error) {
-        console.error(`Task ${taskID} loading failed:`, error);
-        alert("Task load Failed");
-      }
-    },
-
-    async getFileList() {
-      try {
-        const response = await apiClient.get("/files", {
-          params: {
-            task_id: this.$route.params.id,
-          },
-        });
-        this.model.files = response.data.files;
-      } catch (error) {
-        console.error("File loading failed:", error);
-        alert("Failed to load files.");
       }
     },
 
     async uploadFiles() {
       try {
         const formData = new FormData();
-        formData.append("file", this.model.task.file);
+        formData.append("file", this.model.const.file);
         formData.append("task_id", this.$route.params.id);
 
         const response = await apiClient.post("/files", formData, {
@@ -189,7 +240,7 @@ export default {
           },
         });
 
-        await this.getFileList();
+        await this.getTaskData();
         alert(response.data.message);
       } catch (error) {
         console.error("File upload failed:", error);
@@ -223,7 +274,7 @@ export default {
       if (confirm("Are you sure?")) {
         try {
           const response = await apiClient.delete(`/files/${id}`);
-          await this.getFileList();
+          await this.getTaskData();
           alert(response.data.message);
         } catch (error) {
           console.error("Failed to delete file:", error);
@@ -234,7 +285,7 @@ export default {
 
     handleFileUpload(event) {
       const file = event.target.files[0];
-      this.model.task.file = file;
+      this.model.const.file = file;
     },
 
     getTokenFromCookie() {
@@ -254,6 +305,11 @@ export default {
       if (value) {
         return new Date(value).toISOString().slice(0, 10);
       }
+    },
+
+    formatDateTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
     },
 
     statusClass(status) {
