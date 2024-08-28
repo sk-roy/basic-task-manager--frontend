@@ -12,7 +12,7 @@
               <label for="">Email</label>
               <input type="text" v-model="share.email" class="form-control" required/>
             </div>
-            <button type="button" class="btn btn-primary" @click="shareTasks"> Done </button>
+            <button type="button" class="btn btn-primary" @click="shareTasks"> Share </button>
           </form>
         </div>
 

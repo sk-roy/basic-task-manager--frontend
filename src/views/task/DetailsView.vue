@@ -31,10 +31,21 @@
                   </span>
                 </div>
               </div>
+              
+              <div class="mb-6">
+                <h5> Files </h5>
+                <ul>
+                  <div v-for="file in model.files" :key="file.id">
+                    <li>{{ file.filename }}</li>
+                    <button type="button" class="btn btn-primary mx-2 h-10" @click="downloadFile(file.filename, file.id)" >Download</button>
+                    <button type="button" class="btn btn-danger mx-2" @click="deleteFile(file.id)" >Delete</button>
+                  </div>
+                </ul>
+              </div>
             </div>
             <div class="flex">
-              <input id="fileUpload" type="file">
-              <button @click="chooseFiles()">Upload selected File</button>
+              <input id="fileUpload" @change="handleFileUpload" type="file">
+              <button @click="uploadFiles()">Upload selected File</button>
             </div>
           </div>
         </div>
@@ -62,10 +73,11 @@
 
 <script>
 import axios from 'axios';
+import apiClient from '../../plugins/axios'
 
 
   export default {
-    name: 'taskUpdate',
+    name: 'taskDetails',
     data() {
       return {
         model: {
@@ -76,31 +88,104 @@ import axios from 'axios';
             status: '',
             comments: [],
             labels: [],
-            // comments: ['first comment', 'second comment'],
-            // labels: ['secondLabel', 'firstLabel'],
-          }
+            file: null,
+          },
+          files: [],
         }
       }
     },
 
     mounted(){
       this.getTaskData(this.$route.params.id);
+      this.getFileList();
     },
 
     methods: {
 
-      getTaskData(taskId){
-        const token = this.getTokenFromCookie();
-        axios.get(`http://127.0.0.1:8000/api/tasks/${taskId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(res => {
+      async getTaskData(taskId){
+        try {
+          const res = await apiClient.get(`/tasks/${taskId}`);
           this.model.task = res.data;
-        })
-
+        } catch (error) {
+          console.error(`Task ${taskID} loading failed:`, error);
+          alert('Task load Failed');
+        }
       },
+
+      async getFileList() {
+        try {
+          const response = await apiClient.get('/files', {
+            params : {
+              'task_id' : this.$route.params.id,
+            }
+          });
+          this.model.files = response.data.files;
+        } catch (error) {
+          console.error('File loading failed:', error);
+          alert('Failed to load files.');
+        }
+      },  
+
+      async uploadFiles() {
+        try {
+          const formData = new FormData();
+          formData.append('file', this.model.task.file);
+          formData.append('task_id', this.$route.params.id);
+
+          const response = await apiClient.post('/files', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          await this.getFileList();
+          alert(response.data.message);
+        } catch (error) {
+          console.error('File upload failed:', error);
+          alert('Failed to upload the file.');
+        }
+      },
+
+      async downloadFile(name, id) {
+        try {
+          const response = await apiClient.get('/files/download', {
+            params : {
+              'file_id' : id,
+            },
+            responseType: 'blob',
+          });
+
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `${name}.pdf`); 
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        } catch (error) {
+          console.error('File upload failed:', error);
+          alert('Failed to upload the file.');
+        }
+      },
+
+      async deleteFile(id) {        
+        if(confirm('Are you sure?')) {
+          try {
+            const response = await apiClient.delete(`/files/${id}`);
+            await this.getFileList();
+            alert(response.data.message);
+          } catch (error) {
+            console.error('Failed to delete file:', error);
+            alert('Failed to delete the file.');
+          }
+        }
+      },
+
+      handleFileUpload(event) {
+        const file = event.target.files[0];
+        this.model.task.file = file;
+      },
+
       getTokenFromCookie() {
         const name = "auth_token=";
         const decodedCookie = decodeURIComponent(document.cookie);
@@ -129,7 +214,7 @@ import axios from 'axios';
         default:
           return "bg-gray-200 text-gray-800";
       }
-    },
+      },
     }
   }
 
