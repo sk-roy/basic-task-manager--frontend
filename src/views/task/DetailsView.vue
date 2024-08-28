@@ -135,7 +135,7 @@
 </template>
 
 <script>
-import apiClient from "../../plugins/axios";
+import apiClient from "@/plugins/axios";
 
 export default {
   name: "taskDetails",
@@ -302,19 +302,6 @@ export default {
     handleFileUpload(event) {
       const file = event.target.files[0];
       this.model.const.file = file;
-    },
-
-    getTokenFromCookie() {
-      const name = "auth_token=";
-      const decodedCookie = decodeURIComponent(document.cookie);
-      const cookieArray = decodedCookie.split(";");
-      for (let i = 0; i < cookieArray.length; i++) {
-        let cookie = cookieArray[i].trim();
-        if (cookie.indexOf(name) === 0) {
-          return cookie.substring(name.length, cookie.length);
-        }
-      }
-      return null;
     },
 
     formatDate(value) {

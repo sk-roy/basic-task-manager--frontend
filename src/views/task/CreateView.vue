@@ -43,7 +43,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import apiClient from "@/plugins/axios";
+
 export default {
   data() {
     return {
@@ -60,34 +61,13 @@ export default {
 
   methods: {
     async saveTask() {
-      var token = this.getTokenFromCookie();
-      await axios.post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          alert(res.data.message);
-          this.model.task = {
-            title: '',
-            description: '',
-            due_date: '',
-            status: '',
-          }
-        });
-    },
-
-    getTokenFromCookie() {
-      const name = "auth_token=";
-      const decodedCookie = decodeURIComponent(document.cookie);
-      const cookieArray = decodedCookie.split(";");
-      for (let i = 0; i < cookieArray.length; i++) {
-        let cookie = cookieArray[i].trim();
-        if (cookie.indexOf(name) === 0) {
-          return cookie.substring(name.length, cookie.length);
-        }
+      try {
+        const response = await apiClient.post("/tasks/create", this.model.task);
+        this.$router.push("/");
+      } catch (error) {
+        console.error("Failed to create new task:", error);
+        alert("Failed to create new task.");
       }
-      return null;
     },
   },
 };
