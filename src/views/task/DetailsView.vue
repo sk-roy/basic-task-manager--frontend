@@ -43,21 +43,22 @@
               <h5>Files</h5>
               <ul>
                 <div v-for="file in model.task.files" :key="file.id">
-                  <li>{{ file.filename }}</li>
-                  <button
-                    type="button"
-                    class="btn btn-primary mx-2 h-10"
-                    @click="downloadFile(file.filename, file.id)"
+                  <li>
+                    <a
+                      href="#"
+                      @click.prevent="downloadFile(file.filename, file.id)"
+                      class="p-1"
+                      style="text-decoration: none"
+                    >
+                      {{ file.filename }}
+                    </a>
+                  </li>
+                  <a
+                    href="#"
+                    @click.prevent="deleteFile(file.id)"
+                    style="color: red"
+                    >Delete</a
                   >
-                    Download
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-danger mx-2"
-                    @click="deleteFile(file.id)"
-                  >
-                    Delete
-                  </button>
                 </div>
               </ul>
             </div>
@@ -81,48 +82,54 @@
           <div class="card">
             <div class="card-header flex justify-between items-center mb-2">
               <h5 class="font-semibold">{{ comment.name }}</h5>
-              <span class="text-gray-500 text-sm">{{ formatDateTime(comment.created_at) }}</span>
+              <span class="text-gray-500 text-sm">{{
+                formatDateTime(comment.created_at)
+              }}</span>
             </div>
             <div class="card-body">
               <p>{{ comment.message }}</p>
-              <button
-                type="button"
-                class="btn btn-primary mx-2 p-1"
-                @click="editComment(comment)"
-              > Edit </button>
-              <button
-                type="button"
-                class="btn btn-danger mx-2 p-1"
-                @click="deleteComment(comment.id)"
-              > Delete </button>
+              <a href="#" @click.prevent="editComment(comment)" class="p-1"
+                >Edit</a
+              >
+              <a
+                href="#"
+                @click.prevent="deleteComment(comment.id)"
+                class="mx-2 p-1"
+                style="color: red"
+                >Delete</a
+              >
             </div>
-        </div>
+          </div>
         </li>
       </ul>
-        <div class="card-body">
-          <div class="mb-3">
-            <textarea
-              v-model="model.newComment.message"
-              class="form-control"
-              style="width: 400px"
-            ></textarea>
+      <div class="card-body">
+        <div class="mb-3">
+          <textarea
+            v-model="model.newComment.message"
+            class="form-control"
+            style="width: 400px"
+          ></textarea>
+        </div>
+        <div>
+          <div class="mb-3" v-if="model.const.update">
+            <button
+              type="button"
+              @click="updateComment()"
+              class="btn btn-primary mx-2"
+            >
+              Update
+            </button>
+            <button type="button" @click="cancelUpdate" class="btn btn-primary">
+              Cancel
+            </button>
           </div>
-          <div>
-            <div class="mb-3" v-if="model.const.update">
-              <button  type="button" @click="updateComment()" class="btn btn-primary mx-2">
-                Update
-              </button>
-              <button type="button" @click="cancelUpdate" class="btn btn-primary">
-                Cancel
-              </button>
-            </div>
-            <div class="mb-3" v-if="!model.const.update">
-              <button type="button" @click="addComment" class="btn btn-primary">
-                Add comment
-              </button>
-            </div>
+          <div class="mb-3" v-if="!model.const.update">
+            <button type="button" @click="addComment" class="btn btn-primary">
+              Add comment
+            </button>
           </div>
         </div>
+      </div>
     </div>
   </div>
 </template>
@@ -152,7 +159,7 @@ export default {
         newComment: {
           message: "",
           task_id: "",
-        }
+        },
       },
     };
   },
@@ -168,35 +175,41 @@ export default {
         this.model.newComment.task_id = this.$route.params.id;
         const res = await apiClient.post(
           "/comments/create",
-          this.model.newComment,
+          this.model.newComment
         );
         await this.getTaskData();
         this.cancelUpdate();
       } catch (error) {
-        console.error(`Comment add failed to task ${this.model.newComment.task_id}:`, error);
+        console.error(
+          `Comment add failed to task ${this.model.newComment.task_id}:`,
+          error
+        );
         alert("Comment adding failed");
       }
     },
 
     async editComment(comment) {
       this.model.newComment = {
-        'message': comment.message,
-        'task_id': comment.task_id,
-      }
+        message: comment.message,
+        task_id: comment.task_id,
+      };
       this.model.const.updateCommentId = comment.id;
       this.model.const.update = true;
     },
 
     async updateComment(comment) {
-    try {
-      const res = await apiClient.patch(
-        `/comments/${this.model.const.updateCommentId}/update`,
-        this.model.newComment,
-      );      
-      await this.getTaskData();
-      this.cancelUpdate();
+      try {
+        const res = await apiClient.patch(
+          `/comments/${this.model.const.updateCommentId}/update`,
+          this.model.newComment
+        );
+        await this.getTaskData();
+        this.cancelUpdate();
       } catch (error) {
-        console.error(`Comment updating failed on task ${this.model.newComment.task_id}:`, error);
+        console.error(
+          `Comment updating failed on task ${this.model.newComment.task_id}:`,
+          error
+        );
         alert("Comment updating failed");
       }
     },
@@ -212,7 +225,10 @@ export default {
         const res = await apiClient.delete(`/comments/${commentId}/delete`);
         await this.getTaskData();
       } catch (error) {
-        console.error(`Comment deleting to task ${this.model.newComment.task_id}:`, error);
+        console.error(
+          `Comment deleting to task ${this.model.newComment.task_id}:`,
+          error
+        );
         alert("Comment deleting failed");
       }
     },
