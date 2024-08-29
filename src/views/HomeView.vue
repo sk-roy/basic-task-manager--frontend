@@ -39,6 +39,12 @@
                 <th>Description</th>
                 <th>Due Date</th>
                 <th>Status</th>
+                <th @click="sortBy('labels')">
+                  Labels
+                  <span v-if="sortKey === 'labels'">
+                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                  </span>
+                </th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -54,7 +60,12 @@
                 <td>{{ task.title }}</td>
                 <td>{{ task.description }}</td>
                 <td>{{ this.formatDate(task.due_date) }}</td>
-                <td>{{ task.status ? "Completed" : "Incompleted" }}</td>
+                <td>{{ task.status ? "Completed" : "Incompleted" }}</td>               
+                <td>
+                  <div v-for="label in task.labels" :key="label.id">
+                    {{ label.name }}
+                  </div>
+                </td>
                 <td>
                   <RouterLink
                     :to="{ path: '/tasks/' + task.id + '/update' }"
@@ -98,6 +109,8 @@ export default {
   data() {
     return {
       tasks: [],
+      sortKey: '',
+      sortOrder: 'asc', //('asc' or 'desc')
       share: {
         selectedTasks: [],
         email: "",
@@ -112,12 +125,26 @@ export default {
   methods: {
     async getTasks() {
       try {
-        const response = await apiClient.get("/tasks");
+        const params = new URLSearchParams();
+        params.append('sort_key', this.sortKey);
+        params.append('sort_order', this.sortOrder);
+
+        const response = await apiClient.get(`/tasks?${params.toString()}`);
         this.tasks = response.data.tasks;
       } catch (error) {
         console.error("Error during getting task:", error);
         alert("Error during getting tasks");
       }
+    },
+
+    async sortBy(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortOrder = 'asc';
+      }
+      this.sortKey = key;
+      await this.getTasks();
     },
 
     async deleteTasks(taskId) {

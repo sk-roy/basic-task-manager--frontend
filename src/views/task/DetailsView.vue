@@ -27,17 +27,43 @@
             </div>
 
             <div class="mb-6">
-              <h5 class="text-lg font-semibold mb-2">Labels:</h5>
-              <div class="flex gap-2">
-                <span
+              <h6 class="text-lg font-semibold mb-2">Labels:
+                <div
                   v-for="label in model.task.labels"
                   :key="label.id"
                   class="bg-blue-200 text-blue-800 py-1 px-3 rounded-full text-sm font-semibold"
                 >
                   {{ label.name }}
-                </span>
+                </div>
+              </h6>
+              
+                <div class="flex gap-2">
+                <div>                  
+                  <a
+                    href="#"
+                    v-if="!model.const.labelEditMode"
+                    @click.prevent="addLabelButton()"
+                    class="p-1"
+                    >Add Label</a
+                  >  
+
+                  <select v-model="model.const.selectedLabel.label_id" v-if="model.const.labelEditMode">
+                    <!-- <option value="" default>Select one</option> -->
+                    <option v-for="(option, index) in model.labels" :key="index" :value="option.id">
+                      {{ option.name }}
+                    </option>
+                  </select>   
+
+                  <a
+                    href="#"
+                    v-if="model.const.labelEditMode"
+                    @click.prevent="addLabel()"
+                    class="p-1"
+                    >Add</a
+                  >
+                </div>
               </div>
-            </div>
+            </div> 
 
             <div class="mb-6">
               <h5>Files</h5>
@@ -146,6 +172,10 @@ export default {
           update: false,
           updateCommentId: "",
           file: null,
+          labelEditMode: false,
+          selectedLabel: {
+            label_id: "",
+          }
         },
         task: {
           title: "",
@@ -156,6 +186,7 @@ export default {
           labels: [],
           files: [],
         },
+        labels: [],
         newComment: {
           message: "",
           task_id: "",
@@ -166,10 +197,45 @@ export default {
 
   mounted() {
     this.getTaskData();
+    this.loadLabels();
     // this.getFileList();
   },
 
   methods: {
+
+    addLabelButton() {
+      this.model.const.labelEditMode = true;
+    },
+
+    async addLabel() {
+      try {
+        const response = await apiClient.post(`/tasks/${this.$route.params.id}/labels/add`, this.model.const.selectedLabel);
+        this.model.const.labelEditMode = false;
+        await this.getTaskData();
+      } catch (error) {
+        console.error(
+          `Label adding failed on task ${this.$route.params.id}:`,
+          error
+        );
+        alert("Label adding failed.");
+      }
+    },
+
+    async loadLabels() {
+      try {
+        const response = await apiClient.get('/labels');
+        this.model.labels = response.data.labels;
+        console.log(response);
+      } catch (error) {
+        console.error(
+          `Label loading failed on task ${this.model.newComment.task_id}:`,
+          error
+        );
+        alert("Label loading failed.");
+      }
+    },
+
+
     async addComment() {
       try {
         this.model.newComment.task_id = this.$route.params.id;
