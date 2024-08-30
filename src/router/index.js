@@ -5,6 +5,7 @@ import HomeView from '../views/HomeView.vue'
 import TaskCreate from '../views/task/CreateView.vue'
 import TaskDetails from '../views/task/DetailsView.vue'
 import TaskUpdate from '../views/task/UpdateView.vue'
+import NotificationsView from '@/views/notification/NotificationsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,6 +62,14 @@ const router = createRouter({
       path: '/tasks/:id/details',
       name: 'taskDetails',
       component: TaskDetails,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/notification',
+      name: 'notification',
+      component: NotificationsView,
       meta: {
         requiresAuth: true
       }

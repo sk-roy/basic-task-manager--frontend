@@ -3,9 +3,19 @@ import { RouterLink, RouterView } from "vue-router";
 import apiClient from "./plugins/axios";
 import Pusher from "pusher-js";
 import Echo from 'laravel-echo';
+import NotificationIcon from './views/notification/NotificationIcon.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Import FontAwesomeIcon component
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faBell } from '@fortawesome/free-regular-svg-icons'; // Import the specific icon
+
+library.add(faBell); // Add the icon to the library
 
 export default {
   name: "app",
+  components: {
+    FontAwesomeIcon,
+  },
+
   data() {
     return {
       notifications: [],
@@ -16,12 +26,21 @@ export default {
     };
   },
 
+  created() {
+    this.$root.notifications = this.notifications;
+  },
+
   mounted() {
     this.getUser();
     this.subscribeToTaskChannels();
   },
 
   methods: {    
+
+    goToNotifications() {
+      this.$router.push({ name: 'notifications' }); // Navigate to the notifications page
+    },
+    
     async subscribeToTaskChannels() {
       try {
         const params = new URLSearchParams();
@@ -34,27 +53,32 @@ export default {
           console.log(task.title);
           window.Echo.channel(`task.${task.id}`)
             .listen('.task.update', (task) => {
-              this.addNotification(task);
+              var message = `${task.creator_name} updated the task "${task.title}".`;
+              this.addNotification(task, message);
+              // this.$store.dispatch('addNotification', task);
             })
-            // .listen('TaskDeleted', (event) => {
-            //     console.log(`Task ${taskId} deleted:`, event);
-            //     // Handle the event
-            // });
+            .listen('.task.delete', (task) => {
+              var message = `${task.deleted_by_name} deleted the task "${task.title}".`;
+              this.addNotification(task, message);
+            })
+            .listen('.task.addComment', (comment) => {
+              var message = `${comment.user_name} added a comment to the task "${comment.task_title}".`;
+              this.addNotification(comment, message);
+            });
         });
-
-        console.log(this.notifications);
       } catch (error) {
         console.error("Error during getting task:", error);
         alert("Error during getting tasks");
       }
     },
 
-    addNotification(task) {
+    addNotification(task, message) {
       const notification = {
           id: task.id,
-          message: `Task "${task.title}" was updated by ${task.creator_name}.`,
+          message: message,
           timestamp: new Date().toLocaleString(),
       };
+      // alert(message);
       this.notifications.push(notification); // Add the notification to the array
     },
 
@@ -134,12 +158,33 @@ export default {
                   >Log Out</RouterLink
                 >
               </li>
+              <li class="nav-item">
+                <RouterLink
+                  class="nav-link active"
+                  aria-current="page"
+                  to="/notification"
+                  @click="goToNotifications"
+                  >
+                    <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" />
+                  </RouterLink
+                >
+              </li>
             </ul>
           </div>
         </div>
       </nav>
     </div>
   </header>
-
   <RouterView />
 </template>
+
+
+<style scoped>
+.notification-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 5px;
+  color: white;
+}
+</style>
