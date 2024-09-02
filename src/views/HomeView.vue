@@ -177,7 +177,7 @@ export default {
       } else {
         try {
           const response = await apiClient.postForm("/tasks/share", this.share);
-          alert(res.data.message);
+          this.toggleSelectAll();
           this.share.selectedTasks = [];
         } catch (error) {
           console.error("Error during sharing task:", error);

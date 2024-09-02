@@ -3,10 +3,9 @@ import { RouterLink, RouterView } from "vue-router";
 import apiClient from "./plugins/axios";
 import Pusher from "pusher-js";
 import Echo from 'laravel-echo';
-import NotificationIcon from './views/notification/NotificationIcon.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'; // Import FontAwesomeIcon component
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBell } from '@fortawesome/free-regular-svg-icons'; // Import the specific icon
+import { faBell } from '@fortawesome/free-regular-svg-icons'; 
 
 library.add(faBell); // Add the icon to the library
 
@@ -31,8 +30,8 @@ export default {
   },
 
   mounted() {
-    this.getUser();
-    this.subscribeToTaskChannels();
+      this.subscribeToTaskChannels();
+      this.getUser();
   },
 
   methods: {    
@@ -50,7 +49,6 @@ export default {
         const response = await apiClient.get('/tasks');
         this.tasks = response.data.tasks;
         response.data.tasks.forEach(task => {
-          console.log(task.title);
           window.Echo.channel(`task.${task.id}`)
             .listen('.task.update', (task) => {
               var message = `${task.creator_name} updated the task "${task.title}".`;
@@ -78,8 +76,10 @@ export default {
           message: message,
           timestamp: new Date().toLocaleString(),
       };
-      // alert(message);
-      this.notifications.push(notification); // Add the notification to the array
+      if (this.user['id'] != task.creator_id) {
+        // alert(message);
+        this.notifications.push(notification); // Add the notification to the array
+      }
     },
 
     async logout() {
@@ -110,20 +110,6 @@ export default {
   <header>
     <div class="wrapper">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid" v-if="!loggedIn">
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <RouterLink
-                  class="nav-link active"
-                  aria-current="page"
-                  to="/login"
-                  >Log In</RouterLink
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
         <div class="container-fluid" v-if="loggedIn">
           <RouterLink class="navbar-brand" to="/">Task Manager</RouterLink>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -141,35 +127,26 @@ export default {
                   >New Task</RouterLink
                 >
               </li>
-              <li class="nav-item">
-                <RouterLink
-                  class="nav-link active"
-                  aria-current="page"
-                  to="/profile"
-                  >{{ user.name }}</RouterLink
-                >
-              </li>
-              <li class="nav-item">
-                <RouterLink
-                  class="nav-link active"
-                  aria-current="page"
-                  to="/login"
-                  @click="logout"
-                  >Log Out</RouterLink
-                >
-              </li>
-              <li class="nav-item">
-                <RouterLink
-                  class="nav-link active"
-                  aria-current="page"
-                  to="/notification"
-                  @click="goToNotifications"
-                  >
-                    <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" />
-                  </RouterLink
-                >
-              </li>
             </ul>
+
+            
+            <form class="d-flex" role="search">
+              <RouterLink
+                class="nav-link active"
+                aria-current="page"
+                to="/notification"
+                >
+                  <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" />
+                </RouterLink
+              >
+              <a class="text-white text-decoration-none mx-3" href="/profile"> {{ user.name }} </a>
+              <RouterLink
+                class="text-white text-decoration-none"
+                aria-current="page"
+                to="/login"
+                @click="logout"
+                >Logout</RouterLink>
+            </form>
           </div>
         </div>
       </nav>
