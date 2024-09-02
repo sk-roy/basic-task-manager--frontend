@@ -1,29 +1,33 @@
 <template>
-  <div class="container mt-5">
-    <div class="card" v-if="user.name">
-      <div class="card-header">
-        <h4>{{ user.name }}</h4>
-      </div>
-      <div class="card-body">
-        <div>
-          <h5 class="text-lg font-semibold mb-2">{{ user.email }}</h5>
+  <div>
+    <NavBar/>
+    <div class="container mt-5">
+      <div class="card" v-if="user.name">
+        <div class="card-header">
+          <h4>{{ user.name }}</h4>
         </div>
+        <div class="card-body">
+          <div>
+            <h5 class="text-lg font-semibold mb-2">{{ user.email }}</h5>
+          </div>
 
-        <div>
-          <h5 class="text-lg font-semibold mb-2">
-            {{ user.admin == 1 ? "Admin" : "Not Admin" }}
-          </h5>
+          <div>
+            <h5 class="text-lg font-semibold mb-2">
+              {{ user.admin == 1 ? "Admin" : "Not Admin" }}
+            </h5>
+          </div>
         </div>
+      </div>
+
+      <div class="card" v-if="!user.name">
+        <h5 class="text-lg font-semibold mb-2">Loading...</h5>
       </div>
     </div>
-
-    <div class="card" v-if="!user.name">
-      <h5 class="text-lg font-semibold mb-2">Loading...</h5>
-    </div>
-  </div>
+</div>
 </template>
 
 <script>
+import NavBar from "@/components/NavBar.vue";
 import apiClient from "@/plugins/axios";
 
 export default {
@@ -32,6 +36,10 @@ export default {
     return {
       user: [],
     };
+  },
+
+  components: {
+    NavBar,
   },
 
   mounted() {

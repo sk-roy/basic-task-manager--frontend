@@ -1,5 +1,8 @@
 <template>
   <main>
+    <div>
+      <NavBar />
+    </div>
     <div class="container mt-5">
       <div class="card">
         <div
@@ -103,6 +106,7 @@
 
 <script>
 import apiClient from "@/plugins/axios";
+import NavBar from "@/components/NavBar.vue";
 
 export default {
   name: "tasks",
@@ -117,6 +121,10 @@ export default {
       },
       selectAll: false,
     };
+  },
+
+  components: {
+    NavBar
   },
 
   mounted() {

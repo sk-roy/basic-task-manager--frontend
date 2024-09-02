@@ -1,8 +1,10 @@
 <template>
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-header">
-        <h4>Add Tasks</h4>
+  <div>
+    <NavBar />
+    <div class="container mt-5">
+      <div class="card">
+        <div class="card-header">
+          <h4>Add Tasks</h4>
       </div>
       <div class="card-body">
         <div class="mb-3">
@@ -39,11 +41,13 @@
         </div>
       </div>
     </div>
+    </div>  
   </div>
 </template>
 
 <script>
 import apiClient from "@/plugins/axios";
+import NavBar from "@/components/NavBar.vue";
 
 export default {
   data() {
@@ -57,6 +61,10 @@ export default {
         },
       },
     };
+  },
+
+  components: {
+    NavBar
   },
 
   methods: {

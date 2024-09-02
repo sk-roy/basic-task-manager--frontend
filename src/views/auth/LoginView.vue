@@ -1,7 +1,7 @@
 <template>
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-header">
+  <div class="container mt-5 d-flex justify-content-center ">
+    <div class="card custom-width">
+      <div class="card-header d-flex justify-content-center ">
         <h4>Log In</h4>
       </div>
       <div class="card-body">
@@ -13,15 +13,24 @@
           <label for="">Password</label>
           <input type="password" v-model="password" class="form-control" />
         </div>
-        <div class="mb-3">
+        <div class="d-flex justify-content-center mb-3 gap-3">
           <button type="button" @click="login()" class="btn btn-primary">
-            Login
+              Login
+          </button>
+          <button type="button" @click="registration()" class="btn btn-primary">
+              Registration
           </button>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style>
+.custom-width {
+    width: 600px;
+}
+</style>
 
 <script>
 import axios from "axios";
@@ -55,6 +64,10 @@ export default {
         alert("Login failed. Please check your credentials.");
       }
     },
+
+    registration() {
+      this.$router.push("/register");
+    }
   },
 };
 </script>

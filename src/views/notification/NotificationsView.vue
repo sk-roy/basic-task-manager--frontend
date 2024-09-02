@@ -1,4 +1,7 @@
 <template>
+    <div>
+        <NavBar/>
+    </div>
     <div class="notifications">
         <h1>Notifications</h1>
         <ul>
@@ -10,6 +13,8 @@
 </template>
 
 <script>
+import NavBar from '@/components/NavBar.vue';
+
 export default {
   props: {
     notifications: {
@@ -17,6 +22,10 @@ export default {
       default: () => [],
     },
   },
+
+  components: {
+    NavBar,
+  }
 };
 </script>
 

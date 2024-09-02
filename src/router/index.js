@@ -6,6 +6,8 @@ import TaskCreate from '../views/task/CreateView.vue'
 import TaskDetails from '../views/task/DetailsView.vue'
 import TaskUpdate from '../views/task/UpdateView.vue'
 import NotificationsView from '@/views/notification/NotificationsView.vue'
+import apiClient from "../plugins/axios"
+import RegisterView from '@/views/auth/RegisterView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +16,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView,
+    },
+    {
+      path: '/register',
+      name: 'registration',
+      component: RegisterView,
     },
     {
       path: '/logout',
@@ -75,8 +82,6 @@ const router = createRouter({
 })
 
 
-
-
 const getTokenFromCookie = () => {
   const name = "auth_token=";
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -91,17 +96,31 @@ const getTokenFromCookie = () => {
 }
 
 
+export const checkAuth = async () => {
+  try {
+    const response = await apiClient.get('/check-auth');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    const token = getTokenFromCookie();
-    if (token) {
-      next();
-    } else {
+    checkAuth().then(authenticated => {
+      if (authenticated) {
+        next();
+      } else {
+        next('/login');
+      }
+    }).catch(error => {
+      console.error('Error checking authentication:', error);
       next('/login');
-    }
+    });
   } else {
     next();
   }
 });
 
-export default router
+export default router;

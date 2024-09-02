@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <NavBar/>
+  </div>
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
@@ -161,6 +164,7 @@
 </template>
 
 <script>
+import NavBar from "@/components/NavBar.vue";
 import apiClient from "@/plugins/axios";
 
 export default {
@@ -193,6 +197,10 @@ export default {
         },
       },
     };
+  },
+
+  components: {
+    NavBar,
   },
 
   mounted() {
