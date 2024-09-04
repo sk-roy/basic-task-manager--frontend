@@ -5,8 +5,9 @@
     <div class="notifications">
         <h1>Notifications</h1>
         <ul>
-            <li v-for="notification in $root.notifications" :key="notification.id">
-                <strong>{{ notification.message }}  </strong> {{ notification.timestamp }}
+            <li v-for="notification in notifications" :key="notification.id">
+                <strong>{{ notification.data.message }}  </strong> {{ formatDateTime(notification.created_at) }}
+                {{ notification.unread ? 'New' : '' }}
             </li>
         </ul>
     </div>
@@ -14,12 +15,34 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue';
+import apiClient from '@/plugins/axios';
 
 export default {
-  props: {
-    notifications: {
-      type: Array,
-      default: () => [],
+  data() {
+    return {
+        notifications: [],
+    }
+  },
+
+  mounted() {
+    this.allNotifications();
+  },
+
+  methods: {
+    async allNotifications() {
+        try {
+            const response = await apiClient.get('/notification/unread');
+            console.log(response);
+            this.notifications = response.data.notifications;
+        } catch (error) {
+            console.error('Failed on notifications loading: ', error);
+        }
+    },
+    
+
+    formatDateTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
     },
   },
 

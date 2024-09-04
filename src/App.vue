@@ -2,7 +2,7 @@
 import { RouterLink, RouterView } from "vue-router";
 import apiClient from "./plugins/axios";
 import Pusher from "pusher-js";
-import Echo from 'laravel-echo';
+// import Echo from 'laravel-echo';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBell } from '@fortawesome/free-regular-svg-icons'; 
@@ -16,6 +16,19 @@ export default {
     FontAwesomeIcon,
     NavBar,
   },
+
+  // mounted() {
+  //   this.listenNotification();
+  // },
+
+  // methods: {
+  //   listenNotification() {
+  //     window.Echo.private('App.Models.User.' + '1')
+  //     .notification((notification) => {
+  //         console.log(notification.type);
+  //     });
+  //   }
+  // }
 
 };
 

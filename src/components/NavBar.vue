@@ -26,37 +26,28 @@
 
             
             <form class="d-flex" role="search">
-            <RouterLink
-                class="nav-link active"
-                aria-current="page"
-                to="/notification"
-                v-if="loggedIn"
+                <RouterLink
+                    class="nav-link active"
+                    aria-current="page"
+                    to="/notification"
+                    v-if="loggedIn"
+                    >
+                      <div class="d-flex mb-2">
+                        <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" />
+                        <!-- <b-avatar class="text-black bg-white">2</b-avatar> -->
+                        <div class="rounded-full text-black bg-white p-1">{{ $root.notifications.length }}</div>
+                      </div>
+                    
+                    </RouterLink
                 >
-                <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" />
-                </RouterLink
-            >
-            <a class="text-white text-decoration-none mx-3" href="/profile" v-if="loggedIn"> {{ user.name }} </a>
-            <RouterLink
-                class="text-white text-decoration-none"
-                aria-current="page"
-                to="/login"
-                @click="logout"
-                v-if="loggedIn"
-                >Logout</RouterLink>
-            <RouterLink
-                class="text-white text-decoration-none"
-                aria-current="page"
-                to="/login"
-                @click="login"
-                v-if="!loggedIn"
-                >Login</RouterLink>
-            <RouterLink
-                class="text-white text-decoration-none"
-                aria-current="page"
-                to="/register"
-                @click="register"
-                v-if="!loggedIn"
-                >Registration</RouterLink>
+                <a class="text-white text-decoration-none mx-3" href="/profile" v-if="loggedIn"> {{ user.name }} </a>
+                <RouterLink
+                    class="text-white text-decoration-none"
+                    aria-current="page"
+                    to="/login"
+                    @click="logout"
+                    v-if="loggedIn"
+                    >Logout</RouterLink>
             </form>
         </div>
         </div>
@@ -82,6 +73,7 @@
   
     data() {
       return {
+        notificationCounter: 0,
         notifications: [],
         messages: [],
         tasks: [],
@@ -98,10 +90,10 @@
   
     mounted() {
         this.checkAuth();
-        if(this.loggedIn) {
-            this.subscribeToTaskChannels();
-            this.getUser();
-        }
+        // if(this.loggedIn) {
+          this.subscribeToTaskChannels();
+          this.getUser();
+        // }
     },
   
     methods: {    
@@ -111,25 +103,20 @@
       },
       
       async subscribeToTaskChannels() {
+        const userId = 1;
+        const channelName = `App.Models.User.${userId}`;
         try {
-          const response = await apiClient.get('/tasks');
-          this.tasks = response.data.tasks;
-          response.data.tasks.forEach(task => {
-            window.Echo.channel(`task.${task.id}`)
+
+            window.Echo.channel(channelName)
               .listen('.task.update', (task) => {
-                var message = `${task.creator_name} updated the task "${task.title}".`;
-                this.addNotification(task, message);
+                this.addNotification(task);
+                // alert(task.message);
+                console.log("first");
+                this.notificationCounter++;
+                console.log(this.notificationCounter);
+                // alert(task.message);
                 // this.$store.dispatch('addNotification', task);
               })
-              .listen('.task.delete', (task) => {
-                var message = `${task.deleted_by_name} deleted the task "${task.title}".`;
-                this.addNotification(task, message);
-              })
-              .listen('.task.addComment', (comment) => {
-                var message = `${comment.user_name} added a comment to the task "${comment.task_title}".`;
-                this.addNotification(comment, message);
-              });
-          });
         } catch (error) {
           console.error("Error during getting task:", error);
           alert("Error during getting tasks");
@@ -139,13 +126,10 @@
       addNotification(task, message) {
         const notification = {
             id: task.id,
-            message: message,
+            message: task.message,
             timestamp: new Date().toLocaleString(),
         };
-        if (this.user['id'] != task.creator_id) {
-          // alert(message);
-          this.notifications.push(notification);
-        }
+        this.notifications.push(notification);
       },
 
       removeCookie(name) {
@@ -179,7 +163,6 @@
       async checkAuth() {
         try {
           const response = await apiClient.get('check-auth');
-          console.log(response.data.authenticated);
           this.loggedIn = response.data.authenticated;
           this.authenticated = response.data.authenticated;
           this.$root.authenticated = response.data.authenticated;

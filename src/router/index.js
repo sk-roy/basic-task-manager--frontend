@@ -35,6 +35,7 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
+        title: 'Home - Task Manager',
         requiresAuth: true
       }
     },
@@ -43,6 +44,7 @@ const router = createRouter({
       name: 'profile',
       component: ProfileView,
       meta: {
+        title: 'Profile - Task Manager',
         requiresAuth: true
       }
     },
@@ -51,6 +53,7 @@ const router = createRouter({
       name: 'newtask',
       component: TaskCreate,
       meta: {
+        title: 'Add New Task - Task Manager',
         requiresAuth: true
       }
     },
@@ -59,6 +62,7 @@ const router = createRouter({
       name: 'taskUpdate',
       component: TaskUpdate,
       meta: {
+        title: 'Task Update - Task Manager',
         requiresAuth: true
       }
     },
@@ -67,6 +71,7 @@ const router = createRouter({
       name: 'taskDetails',
       component: TaskDetails,
       meta: {
+        title: 'Task Details - Task Manager',
         requiresAuth: true
       }
     },
@@ -75,6 +80,7 @@ const router = createRouter({
       name: 'notification',
       component: NotificationsView,
       meta: {
+        title: 'Notification - Task Manager',
         requiresAuth: true
       }
     },
@@ -107,6 +113,7 @@ export const checkAuth = async () => {
 
 
 router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'Task Manager';
   if (to.meta.requiresAuth) {
     checkAuth().then(authenticated => {
       if (authenticated) {
