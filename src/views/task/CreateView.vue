@@ -1,8 +1,10 @@
 <template>
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-header">
-        <h4>Add Tasks</h4>
+  <div>
+    <NavBar />
+    <div class="container mt-5">
+      <div class="card">
+        <div class="card-header">
+          <h4>Add Tasks</h4>
       </div>
       <div class="card-body">
         <div class="mb-3">
@@ -39,10 +41,14 @@
         </div>
       </div>
     </div>
+    </div>  
   </div>
 </template>
 
 <script>
+import apiClient from "@/plugins/axios";
+import NavBar from "@/components/NavBar.vue";
+
 export default {
   data() {
     return {
@@ -50,47 +56,26 @@ export default {
         task: {
           title: "",
           description: "",
-          due_date: "",
-          status: "",
+          due_date: new Date().toISOString().split("T")[0],
+          status: "0",
         },
       },
     };
   },
 
-  methods: {
-    saveTask() {
-      var token = this.getTokenFromCookie();
-      console.log(token);
-      console.log(this.model.task.title);
-      axios
-        .post("http://127.0.0.1:8000/api/tasks/create", this.model.task, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          console.log(res);
-          alert(res.data.message);
-          this.model.task = {
-            title: '',
-            description: '',
-            due_date: '',
-            status: '',
-          }
-        });
-    },
+  components: {
+    NavBar
+  },
 
-    getTokenFromCookie() {
-      const name = "auth_token=";
-      const decodedCookie = decodeURIComponent(document.cookie);
-      const cookieArray = decodedCookie.split(";");
-      for (let i = 0; i < cookieArray.length; i++) {
-        let cookie = cookieArray[i].trim();
-        if (cookie.indexOf(name) === 0) {
-          return cookie.substring(name.length, cookie.length);
-        }
+  methods: {
+    async saveTask() {
+      try {
+        const response = await apiClient.post("/tasks/create", this.model.task);
+        this.$router.push("/");
+      } catch (error) {
+        console.error("Failed to create new task:", error);
+        alert("Failed to create new task.");
       }
-      return null;
     },
   },
 };
